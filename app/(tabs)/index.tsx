@@ -1,75 +1,197 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  Alert,
+  FlatList,
+  Image,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+  RefreshControl,
+} from "react-native";
+import "../../global.css";
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+interface Lawyer {
+  id: string;
+  name: string;
+  specialization: string;
+  photo: string;
+  isOnline: boolean;
+  avatar:string;
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+// ...existing code...
+
+export default function Index() {
+  const [lawyers, setLawyers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const [refreshing, setRefreshing] = useState(false);
+  // Fetch lawyers from API
+  useEffect(() => {
+    const fetchLawyers = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetch(
+          "https://687a6716abb83744b7ecb12b.mockapi.io/api/lw/Lawyers"
+        );
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        const data = await response.json();
+        setLawyers(data);
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : "Failed to load lawyers";
+        setError(errorMessage);
+        Alert.alert("Error", errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLawyers();
+  }, []);
+
+  const handleLawyerPress = (lawyer: Lawyer) => {
+    try {
+    router.push(`/lawyer/${lawyer.id}`);
+    } catch (err) {
+      Alert.alert("Error", "Unable to navigate to lawyer profile");
+    }
+  };
+
+  const handleRefresh = () => {
+    setLawyers([]);
+    setError(null);
+    setLoading(true);
+    // Re-fetch from API
+    fetch("https://687a6716abb83744b7ecb12b.mockapi.io/api/lw/Lawyers")
+      .then((response) => {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.json();
+      })
+      .then((data) => {
+        setLawyers(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message || "Failed to load lawyers");
+        setLoading(false);
+      });
+  };
+  const handleRefreshOnPull = () => {
+    setRefreshing(true); // Set refreshing to true
+    setError(null);
+    // Re-fetch from API
+    fetch("https://687a6716abb83744b7ecb12b.mockapi.io/api/lw/Lawyers")
+      .then((response) => {
+        if (!response.ok) throw new Error("Network response was not ok");
+        return response.json();
+      })
+      .then((data) => {
+        setLawyers(data);
+        setRefreshing(false); // Reset refreshing
+      })
+      .catch((err) => {
+        const errorMessage = err.message || "Failed to load lawyers";
+        setError(errorMessage);
+        setRefreshing(false); // Reset refreshing
+        Alert.alert("Error", errorMessage);
+      });
+  };
+
+  const renderLawyerItem = ({ item }: { item: Lawyer }) => (
+    <TouchableOpacity
+      className="flex-row items-center bg-gray-800 mx-4 mb-3 p-4 rounded-xl"
+      onPress={() => handleLawyerPress(item)}
+      activeOpacity={0.7}
+    >
+      <View className="relative">
+        <Image
+          source={{uri:item.avatar}}
+          className="w-14 h-14 rounded-full"
+          style={{ width: 56, height: 56 }}
+          //onError={() => Alert.alert("Error", "Failed to load profile image")}
+        />
+        <View
+          className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-gray-800 ${
+            item.isOnline ? "bg-green-500" : "bg-gray-500"
+          }`}
+        />
+      </View>
+
+      <View className="flex-1 ml-4">
+        <Text className="text-white text-lg font-semibold">{item.name}</Text>
+        <Text className="text-gray-400 text-sm mt-1">
+          {item.specialization}
+        </Text>
+      </View>
+
+      <Ionicons name="chevron-forward" size={20} color="#9CA3AF" />
+    </TouchableOpacity>
+  );
+
+  if (loading) {
+    return (
+      <View className="flex-1 bg-gray-900 justify-center items-center">
+        <StatusBar barStyle="light-content" backgroundColor="#111827" />
+        <Text className="text-white text-lg">Loading lawyers...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View className="flex-1 bg-gray-900 justify-center items-center px-4">
+        <StatusBar barStyle="light-content" backgroundColor="#111827" />
+        <Text className="text-white text-lg mb-4">Unable to load lawyers</Text>
+        <TouchableOpacity
+          className="bg-blue-600 px-6 py-3 rounded-lg"
+          onPress={handleRefresh}
+        >
+          <Text className="text-white font-semibold">Retry</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  return (
+    <View className="flex-1 bg-gray-900">
+      <StatusBar barStyle="light-content" backgroundColor="#111827" />
+
+      {/* Header */}
+      <View className="flex-row items-center justify-between px-4 py-4 bg-gray-800 border-b border-gray-700">
+        <TouchableOpacity>
+          <Ionicons name="menu" size={24} color="#ffffff" />
+        </TouchableOpacity>
+
+        <Text className="text-white text-xl font-bold">Lawyers</Text>
+
+        <TouchableOpacity>
+          <Ionicons name="search" size={24} color="#ffffff" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Lawyers List */}
+      <FlatList
+        data={lawyers}
+        renderItem={renderLawyerItem}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={{ paddingTop: 16, paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefreshOnPull}
+            colors={["#3B82F6"]} // Optional: Customize spinner color to match your theme (blue)
+            tintColor="#3B82F6" // Optional: iOS spinner color
+          />
+        }
+      />
+    </View>
+  );
+}
