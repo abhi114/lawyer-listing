@@ -25,6 +25,18 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
+## App Screens
+
+This app includes three main screens:
+
+- **Home Screen**: Displays a list of lawyers fetched from a remote API. Includes search and filter functionality for lawyer name and specialization.
+- **Lawyer Profile Screen**: Shows detailed information about a selected lawyer, including their experience, languages, rating, and an option to start a chat.
+- **Chat Screen**: Allows users to chat with a lawyer. Conversations can be saved to device storage and are retrieved for each lawyer.
+
+## State Management
+
+The app uses [Zustand](https://github.com/pmndrs/zustand) for global state management. Zustand is used to store and access user and lawyer data across screens, making it easy to manage and share state in a scalable way.
+
 ## Get a fresh project
 
 When you're ready, run:
