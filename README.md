@@ -30,12 +30,20 @@ You can start developing by editing the files inside the **app** directory. This
 This app includes three main screens, accessible via bottom tabs:
 
 - **Home Screen**: Displays a list of lawyers fetched from a remote API (Mock API). Features:
+  - Online/offline indicator: Shows each lawyer's current status.
   - Pull-to-refresh: Swipe down to refresh the lawyer list.
   - Search/filter: Quickly find lawyers by name or specialization using the search bar.
+  - Error handling: Displays a message if the API call fails.
 - **Lawyer Profile Screen**: Shows detailed information about a selected lawyer, including their experience, languages, rating, and an option to start a chat.
 - **Chat Screen**: Allows users to chat with a lawyer. Features:
   - Persist chat history: Conversations are saved using AsyncStorage and loaded per lawyer.
   - Typing indicator: Shows when the lawyer is typing a response.
+
+## Architecture & Technologies
+
+- **Component-Based Architecture**: The app is built using reusable React components for maintainability and scalability.
+- **Navigation**: Uses expo-router for file-based routing and navigation between screens.
+- **Languages**: Built with both TypeScript and JavaScript for type safety and flexibility.
 
 ## Navigation
 
