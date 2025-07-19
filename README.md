@@ -25,13 +25,21 @@ In the output, you'll find options to open the app in a
 
 You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
 
-## App Screens
+## App Screens & Features
 
-This app includes three main screens:
+This app includes three main screens, accessible via bottom tabs:
 
-- **Home Screen**: Displays a list of lawyers fetched from a remote API. Includes search and filter functionality for lawyer name and specialization.
+- **Home Screen**: Displays a list of lawyers fetched from a remote API (Mock API). Features:
+  - Pull-to-refresh: Swipe down to refresh the lawyer list.
+  - Search/filter: Quickly find lawyers by name or specialization using the search bar.
 - **Lawyer Profile Screen**: Shows detailed information about a selected lawyer, including their experience, languages, rating, and an option to start a chat.
-- **Chat Screen**: Allows users to chat with a lawyer. Conversations can be saved to device storage and are retrieved for each lawyer.
+- **Chat Screen**: Allows users to chat with a lawyer. Features:
+  - Persist chat history: Conversations are saved using AsyncStorage and loaded per lawyer.
+  - Typing indicator: Shows when the lawyer is typing a response.
+
+## Navigation
+
+The app uses bottom tab navigation for easy access to Home, Chat, and Profile screens.
 
 ## State Management
 
