@@ -6,6 +6,7 @@ import {
   FlatList,
   Image,
   RefreshControl,
+  SafeAreaView,
   StatusBar,
   Text,
   TextInput,
@@ -181,7 +182,7 @@ export default function Index() {
   }
 
   return (
-    <View className="flex-1 bg-gray-900">
+    <SafeAreaView className="flex-1 bg-gray-900">
       <StatusBar barStyle="light-content" backgroundColor="#111827" />
 
       {/* Header */}
@@ -228,6 +229,6 @@ export default function Index() {
         }
       />
       
-    </View>
+    </SafeAreaView>
   );
 }

@@ -97,13 +97,17 @@ export default function ChatScreen() {
   };
 
   useEffect(() => {
-    const onBackPress = () => {
-      handleBack();
-      return true;
-    };
-    BackHandler.addEventListener('hardwareBackPress', onBackPress);
-   
-  }, [messages, lawyer]);
+  const onBackPress = () => {
+    handleBack();
+    return true;
+  };
+
+  const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+  return () => {
+    subscription.remove(); // ✅ proper cleanup
+  };
+}, [messages, lawyer]);
   // Render each message
   const renderMessage = ({ item }) => (
     <View>
