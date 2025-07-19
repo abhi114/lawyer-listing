@@ -5,11 +5,12 @@ import {
   Alert,
   FlatList,
   Image,
+  RefreshControl,
   StatusBar,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
-  RefreshControl,
 } from "react-native";
 import "../../global.css";
 
@@ -26,10 +27,13 @@ interface Lawyer {
 
 export default function Index() {
   const [lawyers, setLawyers] = useState([]);
+  const [filteredLawyers, setFilteredLawyers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
+  const [searchVisible, setSearchVisible] = useState(false);
+  const [searchText, setSearchText] = useState("");
   // Fetch lawyers from API
   useEffect(() => {
     const fetchLawyers = async () => {
@@ -44,6 +48,7 @@ export default function Index() {
         }
         const data = await response.json();
         setLawyers(data);
+        setFilteredLawyers(data);
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : "Failed to load lawyers";
@@ -55,6 +60,21 @@ export default function Index() {
     };
     fetchLawyers();
   }, []);
+
+  useEffect(() => {
+    if (searchText.trim() === "") {
+      setFilteredLawyers(lawyers);
+    } else {
+      const lowerSearch = searchText.toLowerCase();
+      setFilteredLawyers(
+        lawyers.filter(
+          (lawyer) =>
+            lawyer.name.toLowerCase().includes(lowerSearch) ||
+            lawyer.specialization.toLowerCase().includes(lowerSearch)
+        )
+      );
+    }
+  }, [searchText, lawyers]);
 
   const handleLawyerPress = (lawyer: Lawyer) => {
     try {
@@ -76,6 +96,7 @@ export default function Index() {
       })
       .then((data) => {
         setLawyers(data);
+        setFilteredLawyers(data);
         setLoading(false);
       })
       .catch((err) => {
@@ -94,6 +115,7 @@ export default function Index() {
       })
       .then((data) => {
         setLawyers(data);
+        setFilteredLawyers(data);
         setRefreshing(false); // Reset refreshing
       })
       .catch((err) => {
@@ -104,7 +126,7 @@ export default function Index() {
       });
   };
 
-  const renderLawyerItem = ({ item }: { item: Lawyer }) => (
+ const renderLawyerItem = ({ item }: { item: Lawyer }) => (
     <TouchableOpacity
       className="flex-row items-center bg-gray-800 mx-4 mb-3 p-4 rounded-xl"
       onPress={() => handleLawyerPress(item)}
@@ -115,7 +137,6 @@ export default function Index() {
           source={{uri:item.avatar}}
           className="w-14 h-14 rounded-full"
           style={{ width: 56, height: 56 }}
-          //onError={() => Alert.alert("Error", "Failed to load profile image")}
         />
         <View
           className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-gray-800 ${
@@ -171,14 +192,28 @@ export default function Index() {
 
         <Text className="text-white text-xl font-bold">Lawyers</Text>
 
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => setSearchVisible((v) => !v)}>
           <Ionicons name="search" size={24} color="#ffffff" />
         </TouchableOpacity>
       </View>
 
+      {/* Search Bar */}
+      {searchVisible && (
+        <View className="px-4 py-2 bg-gray-900 border-b border-gray-700">
+          <TextInput
+            className="bg-gray-800 text-white px-4 py-2 rounded-lg"
+            placeholder="Search by name or specialization..."
+            placeholderTextColor="#9CA3AF"
+            value={searchText}
+            onChangeText={setSearchText}
+            autoFocus
+          />
+        </View>
+      )}
+
       {/* Lawyers List */}
       <FlatList
-        data={lawyers}
+        data={filteredLawyers}
         renderItem={renderLawyerItem}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ paddingTop: 16, paddingBottom: 20 }}
@@ -187,11 +222,12 @@ export default function Index() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefreshOnPull}
-            colors={["#3B82F6"]} // Optional: Customize spinner color to match your theme (blue)
-            tintColor="#3B82F6" // Optional: iOS spinner color
+            colors={["#3B82F6"]}
+            tintColor="#3B82F6"
           />
         }
       />
+      
     </View>
   );
 }

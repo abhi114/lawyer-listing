@@ -10,13 +10,20 @@ import {
   Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
+import { useUserStore } from "../components/shared/UserStore";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { goBack } from "expo-router/build/global-state/routing";
+import { Alert, BackHandler } from "react-native";
 export default function ChatScreen() {
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
   const [lawyerTyping, setLawyerTyping] = useState(false);
-
+  const lawyer = useUserStore((state) => state.user);
   // Simulated lawyer responses based on user input
+  //console.log("Lawyer data:", lawyer);
+  useEffect(()=>{
+   
+  },[lawyer?.id]);
   const simulateLawyerResponse = (userMessage) => {
     setLawyerTyping(true);
     setTimeout(() => {
@@ -56,7 +63,47 @@ export default function ChatScreen() {
       simulateLawyerResponse(inputText);
     }
   }, [inputText]);
+   const handleBack = () => {
+    if(messages.length >1) {
+    Alert.alert(
+      "Save Conversation",
+      "Do you want to save this conversation before leaving?",
+      [
+        {
+          text: "No",
+          style: "cancel",
+          onPress: () => goBack(),
+        },
+        {
+          text: "Yes",
+          onPress: async () => {
+            if (lawyer?.id) {
+              try {
+                await AsyncStorage.setItem(
+                  `chat_${lawyer.id}`,
+                  JSON.stringify(messages)
+                );
+              } catch (e) {
+                // Optionally handle error
+              }
+            }
+            goBack();
+          },
+        },
+      ]
+    );}else{
+      goBack();
+    }
+  };
 
+  useEffect(() => {
+    const onBackPress = () => {
+      handleBack();
+      return true;
+    };
+    BackHandler.addEventListener('hardwareBackPress', onBackPress);
+   
+  }, [messages, lawyer]);
   // Render each message
   const renderMessage = ({ item }) => (
     <View>
@@ -74,7 +121,7 @@ export default function ChatScreen() {
       </Text>
     </View>
     <Image
-            source={item?.sender === "user"?{uri: "https://cdn.jsdelivr.net/gh/faker-js/assets-person-portrait/male/512/30.jpg"}:{uri:'https://avatars.githubusercontent.com/u/23932683'}}
+            source={item?.sender === "user"?{uri: "https://cdn.jsdelivr.net/gh/faker-js/assets-person-portrait/male/512/30.jpg"}:{uri:lawyer.avatar}}
             className={`w-24 h-24 rounded-full ${
               item.sender === "user"
                 ? "self-end bg-blue-500"
@@ -89,14 +136,27 @@ export default function ChatScreen() {
 
   // Initial welcome message
   useEffect(() => {
-    setMessages([
-      {
-        id: "welcome",
-        text: "Hello, I'm here to assist you with your legal concerns. Please share the details of your situation, and I'll do my best to provide guidance.",
-        sender: "lawyer",
-        timestamp: new Date().toISOString(),
-      },
-    ]);
+     const fetchMessages = async () => {
+      try {
+        const savedMessages = await AsyncStorage.getItem(`chat_${lawyer?.id}`);
+        if (savedMessages) {
+          setMessages(JSON.parse(savedMessages));
+        }else{
+             setMessages([
+           {
+            id: "welcome",
+            text: "Hello, I'm here to assist you with your legal concerns. Please share the details of your situation, and I'll do my best to provide guidance.",
+            sender: "lawyer",
+            timestamp: new Date().toISOString(),
+            },
+          ]);
+        }
+      } catch (error) {
+        console.error("Failed to load messages:", error);
+      }
+    };
+    fetchMessages();
+  
   }, []);
 
   return (
@@ -104,9 +164,15 @@ export default function ChatScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1 bg-gray-900"
     >
-        <View className="flex-row justify-between">
-        <Text className="text-white text-lg font-bold mx-4 mt-4">
-          Chat with Lawyer
+        <View className="flex-row w-full  items-center justify-center">
+         <TouchableOpacity
+          className="p-2 -ml-2 self-center items-center font-bold  mt-4"
+          onPress={handleBack}
+        >
+          <Ionicons name="arrow-back" size={24} color="#ffffff" />
+        </TouchableOpacity>
+        <Text className="text-white text-lg self-center items-center font-bold mx-4 mt-4">
+          Chat with {lawyer?.name || "Lawyer"}
           </Text>
         </View>
       <FlatList
@@ -121,7 +187,20 @@ export default function ChatScreen() {
           <Text className="text-gray-400 text-sm">Lawyer is typing...</Text>
         </View>
       )}
+      <View className="flex-col items-center">
+        <View className="flex-row justify-evenly w-full px-4 py-2 border-t border-gray-700"> 
+          <TouchableOpacity className="bg-blue-500 rounded-md p-2" onPress={()=>{setInputText("contract")}}>
+            <Text className="text-white" >contract</Text>
+          </TouchableOpacity>
+          <TouchableOpacity  className="bg-blue-500 rounded-md p-2"  onPress={()=>{setInputText("deadline")}}>
+            <Text className="text-white">deadline</Text>
+          </TouchableOpacity>
+          <TouchableOpacity  className="bg-blue-500 rounded-md p-2"  onPress={()=>{setInputText("payment")}}>
+            <Text className="text-white">payment</Text>
+          </TouchableOpacity>
+        </View>
       <View className="flex-row items-center p-4 bg-gray-800 border-t border-gray-700">
+        
         <TextInput
           className="flex-1 bg-gray-700 text-white p-2 rounded-lg mr-2"
           value={inputText}
@@ -136,6 +215,7 @@ export default function ChatScreen() {
         >
           <Ionicons name="send" size={20} color="white" />
         </TouchableOpacity>
+      </View>
       </View>
     </KeyboardAvoidingView>
   );

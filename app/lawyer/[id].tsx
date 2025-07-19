@@ -7,6 +7,7 @@ import LanguageList from "../components/LanguageList";
 import ProfileHeader from "../components/ProfileHeader";
 import ProfileInfo from "../components/ProfileInfo";
 import { Lawyer } from "../types/lawyer";
+import { useUserStore } from "../../components/shared/UserStore";
 // Mock data - in real app, this would come from an API
 // const mockLawyerData: Record<string, Lawyer> = {
 //   "1": {
@@ -64,13 +65,14 @@ const LawyerProfile: React.FC = () => {
     fetchLawyerData();
   }, [id]);
 
-  const handleStartChat = async (lawyerId: string) => {
+  const handleStartChat = async (lawyer: Object) => {
     try {
       setChatLoading(true);
 
       // Simulate chat initialization
+      useUserStore.getState().setUser(lawyer);
       await new Promise((resolve) => setTimeout(resolve, 1500));
-
+      
       // Navigate to chat screen with lawyer ID
       router.push(`/ChatScreen`);
     } catch (err) {
@@ -122,7 +124,7 @@ const LawyerProfile: React.FC = () => {
 
       <ActionButton
         title="Start Chat"
-        onPress={() => handleStartChat(lawyer.id)}
+        onPress={() => handleStartChat(lawyer)}
         loading={chatLoading}
         disabled={!lawyer.isOnline}
       />

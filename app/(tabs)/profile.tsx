@@ -6,7 +6,12 @@ export default function ProfileScreen() {
   return (
     <View className="flex-1 bg-gray-900 p-4">
       {/* Back Button Placeholder */}
-      <TouchableOpacity className="flex-row justify-start mb-4" onPress={()=>{goBack()}}>
+      <TouchableOpacity
+        className="flex-row justify-start mb-4"
+        onPress={() => {
+          goBack();
+        }}
+      >
         <Text className="text-white text-2xl">←</Text>
       </TouchableOpacity>
 
@@ -32,12 +37,12 @@ export default function ProfileScreen() {
       </View>
 
       {/* Stats */}
-      <View className="flex-row justify-center mb-6">
-        <View className="items-center mx-5 bg-gray-800 p-3 rounded-lg">
+      <View className="flex-row justify-center gap-2 mb-6">
+        <View className="items-center  bg-gray-800 p-3 rounded-lg">
           <Text className="text-white text-lg font-bold">12</Text>
           <Text className="text-gray-400 text-sm">Reviews</Text>
         </View>
-        <View className="items-center gap-2 bg-gray-800 p-3 rounded-lg">
+        <View className="items-center  bg-gray-800 p-3 rounded-lg">
           <Text className="text-white text-lg font-bold">24</Text>
           <Text className="text-gray-400 text-sm">Cases</Text>
         </View>
@@ -74,6 +79,7 @@ export default function ProfileScreen() {
           <Text className="text-white text-sm">www.abc.com</Text>
         </View>
       </View>
+      <Text className="text-white text-sm mt-2">Created by:- Abhishek Nigam</Text>
     </View>
   );
 }
