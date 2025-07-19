@@ -1,10 +1,14 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native";
+import { SafeAreaView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabsLayout() {
+    const insets = useSafeAreaInsets();
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <View
+      style={{ flex: 1, paddingTop: insets.top, paddingBottom: insets.bottom }}
+    >
       <Tabs
         screenOptions={{
           tabBarActiveTintColor: "#10b981",
@@ -55,6 +59,6 @@ export default function TabsLayout() {
           }}
         />
       </Tabs>
-    </SafeAreaView>
+    </View>
   );
 }

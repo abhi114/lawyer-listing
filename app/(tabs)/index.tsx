@@ -14,6 +14,7 @@ import {
   View,
 } from "react-native";
 import "../../global.css";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface Lawyer {
   id: string;
@@ -33,6 +34,7 @@ export default function Index() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
+  const insets = useSafeAreaInsets();
   const [searchVisible, setSearchVisible] = useState(false);
   const [searchText, setSearchText] = useState("");
   // Fetch lawyers from API
@@ -182,7 +184,7 @@ export default function Index() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-900">
+    <View className="flex-1 bg-gray-900">
       <StatusBar barStyle="light-content" backgroundColor="#111827" />
 
       {/* Header */}
@@ -229,6 +231,6 @@ export default function Index() {
         }
       />
       
-    </SafeAreaView>
+    </View>
   );
 }
