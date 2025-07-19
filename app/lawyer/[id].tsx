@@ -8,6 +8,7 @@ import ProfileHeader from "../components/ProfileHeader";
 import ProfileInfo from "../components/ProfileInfo";
 import { Lawyer } from "../types/lawyer";
 import { useUserStore } from "../../components/shared/UserStore";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 // Mock data - in real app, this would come from an API
 // const mockLawyerData: Record<string, Lawyer> = {
 //   "1": {
@@ -33,6 +34,7 @@ import { useUserStore } from "../../components/shared/UserStore";
 const LawyerProfile: React.FC = () => {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [lawyer, setLawyer] = useState<Lawyer | null>(null);
   const [loading, setLoading] = useState(true);
   const [chatLoading, setChatLoading] = useState(false);
@@ -108,7 +110,10 @@ const LawyerProfile: React.FC = () => {
   }
 
   return (
-    <View className="flex-1 bg-gray-900">
+    <View
+      className="flex-1 bg-gray-900"
+      style={{ paddingTop: insets.top, paddingBottom: insets.bottom }}
+    >
       <StatusBar barStyle="light-content" backgroundColor="#111827" />
 
       <ScrollView
